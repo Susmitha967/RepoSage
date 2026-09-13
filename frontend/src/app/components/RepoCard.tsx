@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { Star, GitFork, Scale, Clock, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Star, GitFork, Scale, Clock, AlertTriangle, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 interface Finding {
@@ -24,6 +24,7 @@ interface Repo {
 interface RepoCardProps {
   repo: Repo;
   findings?: Finding[];
+  onOpenDetail: (repoName: string) => void;
 }
 
 const severityColor = {
@@ -41,38 +42,51 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(days / 365)}y ago`;
 }
 
-export default function RepoCard({ repo, findings }: RepoCardProps) {
+export default function RepoCard({ repo, findings, onOpenDetail }: RepoCardProps) {
   const [expanded, setExpanded] = useState(false);
   const issueCount = findings?.length || 0;
 
   return (
     <div className="glass rounded-2xl p-5 hover:border-primary/30 transition-colors animate-slide-up">
       <div className="flex items-start justify-between mb-2">
-        <a
-          href={repo.html_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-sm hover:text-primary transition-colors"
+        <button
+          type="button"
+          onClick={() => onOpenDetail(repo.name)}
+          className="font-medium text-sm hover:text-primary transition-colors text-left cursor-pointer"
         >
           {repo.name}
-        </a>
-        {findings !== undefined && (
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
-              issueCount > 0 ? "text-warning bg-warning/10 border-warning/20" : "text-success bg-success/10 border-success/20"
-            }`}
+        </button>
+        <div className="flex items-center gap-1.5">
+          {findings !== undefined && (
+            <button
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+              className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
+                issueCount > 0
+                  ? "text-warning bg-warning/10 border-warning/20"
+                  : "text-success bg-success/10 border-success/20"
+              }`}
+            >
+              {issueCount > 0 ? (
+                <>
+                  <AlertTriangle className="w-3 h-3" /> {issueCount}
+                </>
+              ) : (
+                "Healthy"
+              )}
+              {issueCount > 0 && (expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+            </button>
+          )}
+          <a
+            href={repo.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1 rounded-lg hover:bg-surface-hover text-muted hover:text-foreground transition-colors"
+            title="Open on GitHub"
           >
-            {issueCount > 0 ? (
-              <>
-                <AlertTriangle className="w-3 h-3" /> {issueCount}
-              </>
-            ) : (
-              "Healthy"
-            )}
-            {issueCount > 0 && (expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
-          </button>
-        )}
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
       </div>
 
       <p className="text-xs text-muted line-clamp-2 mb-4 min-h-[2rem]">
@@ -105,10 +119,7 @@ export default function RepoCard({ repo, findings }: RepoCardProps) {
       {expanded && findings && findings.length > 0 && (
         <div className="mt-4 pt-4 border-t border-border space-y-2 animate-fade-in">
           {findings.map((f, i) => (
-            <div
-              key={i}
-              className={`text-xs px-3 py-2 rounded-lg border ${severityColor[f.severity]}`}
-            >
+            <div key={i} className={`text-xs px-3 py-2 rounded-lg border ${severityColor[f.severity]}`}>
               {f.message}
             </div>
           ))}

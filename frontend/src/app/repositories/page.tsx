@@ -7,6 +7,9 @@ import { useUsername } from "../context/UsernameContext";
 import { api } from "@/lib/api";
 import RepoCard from "../components/RepoCard";
 import FilterBar from "../components/FilterBar";
+// import { useState } from "react";
+import RepoDetailModal from "../components/RepoDetailModal"; 
+
 
 interface Repo {
   name: string;
@@ -56,6 +59,7 @@ function sortRepos(repos: Repo[], sortBy: string): Repo[] {
 
 export default function RepositoriesPage() {
   const { username } = useUsername();
+  const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [languageFilter, setLanguageFilter] = useState("all");
   const [sortBy, setSortBy] = useState("stars");
@@ -184,14 +188,24 @@ export default function RepositoriesPage() {
                 key={repo.name}
                 repo={repo}
                 findings={analysisRequested ? findingsByRepo[repo.name] : undefined}
+                onOpenDetail={(repoName) => setSelectedRepo(repoName)}
               />
             ))}
           </div>
 
-          {filteredRepos.length === 0 && (
+                    {filteredRepos.length === 0 && (
             <p className="text-center text-muted mt-8">No repositories match your filters.</p>
           )}
         </>
+      )}
+
+      {selectedRepo && (
+        <RepoDetailModal
+          isOpen={!!selectedRepo}
+          onClose={() => setSelectedRepo(null)}
+          username={username}
+          repoName={selectedRepo}
+        />
       )}
     </div>
   );
