@@ -1,26 +1,71 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-background: hsl(222 47% 6%);
+  --color-surface: hsl(222 40% 9%);
+  --color-surface-hover: hsl(222 35% 12%);
+  --color-border: hsl(222 20% 18%);
+  --color-foreground: hsl(210 40% 98%);
+  --color-muted: hsl(215 20% 65%);
+  --color-primary: hsl(250 84% 64%);
+  --color-primary-foreground: hsl(210 40% 98%);
+  --color-accent: hsl(172 66% 50%);
+  --color-danger: hsl(0 72% 60%);
+  --color-warning: hsl(38 92% 55%);
+  --color-success: hsl(142 71% 45%);
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+
+  --animate-fade-in: fadeIn 0.4s ease-out;
+  --animate-slide-up: slideUp 0.4s ease-out;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "cv11", "ss01";
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .glass {
+    background: color-mix(in srgb, var(--color-surface) 60%, transparent);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 40px -10px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 999px;
+  }
 }
