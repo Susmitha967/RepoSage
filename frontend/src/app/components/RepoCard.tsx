@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { Star, GitFork, Scale, Clock, AlertTriangle, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+import { Star, GitFork, Scale, Clock, AlertTriangle, ChevronDown, ChevronUp, ExternalLink, Zap, BookOpen } from "lucide-react";
 import { useState } from "react";
 
 interface Finding {
@@ -16,21 +16,32 @@ interface Repo {
   language: string | null;
   stars: number;
   forks: number;
-  license: string | null;
+  license?: string | null;
   updated_at: string;
   topics: string[];
+  
+  ai_summary?: string;
+  skill_level?: string;
+  key_concepts?: string[];
+  score?: number;
 }
 
 interface RepoCardProps {
   repo: Repo;
   findings?: Finding[];
-  onOpenDetail: (repoName: string) => void;
+  onOpenDetail?: (repoName: string) => void;
 }
 
 const severityColor = {
   high: "text-danger bg-danger/10 border-danger/20",
   medium: "text-warning bg-warning/10 border-warning/20",
   low: "text-muted bg-surface-hover border-border",
+};
+
+const skillLevelColor: Record<string, string> = {
+  beginner: "text-success bg-success/10 border-success/20",
+  intermediate: "text-warning bg-warning/10 border-warning/20",
+  advanced: "text-danger bg-danger/10 border-danger/20",
 };
 
 function timeAgo(dateStr: string): string {
@@ -47,16 +58,20 @@ export default function RepoCard({ repo, findings, onOpenDetail }: RepoCardProps
   const issueCount = findings?.length || 0;
 
   return (
-    <div className="glass rounded-2xl p-5 hover:border-primary/30 transition-colors animate-slide-up">
+    <div className="glass rounded-2xl p-5 hover:border-primary/30 transition-colors animate-slide-up flex flex-col h-full">
       <div className="flex items-start justify-between mb-2">
-        <button
-          type="button"
-          onClick={() => onOpenDetail(repo.name)}
-          className="font-medium text-sm hover:text-primary transition-colors text-left cursor-pointer"
-        >
-          {repo.name}
-        </button>
-        <div className="flex items-center gap-1.5">
+        {onOpenDetail ? (
+          <button
+            type="button"
+            onClick={() => onOpenDetail(repo.name)}
+            className="font-medium text-sm hover:text-primary transition-colors text-left cursor-pointer break-all"
+          >
+            {repo.name}
+          </button>
+        ) : (
+          <div className="font-medium text-sm text-foreground break-all">{repo.name}</div>
+        )}
+        <div className="flex items-center gap-1.5 shrink-0">
           {findings !== undefined && (
             <button
               type="button"
@@ -93,7 +108,31 @@ export default function RepoCard({ repo, findings, onOpenDetail }: RepoCardProps
         {repo.description || "No description"}
       </p>
 
-      <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
+      {repo.ai_summary && (
+        <div className="mb-4 text-sm text-foreground/90 bg-primary/5 border border-primary/10 rounded-lg p-3">
+          <div className="flex items-center gap-1.5 mb-1.5 text-primary font-medium text-xs">
+            <Zap className="w-3.5 h-3.5" /> AI Summary
+          </div>
+          {repo.ai_summary}
+        </div>
+      )}
+
+      {repo.key_concepts && repo.key_concepts.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-1.5 mb-2 text-muted font-medium text-xs">
+            <BookOpen className="w-3.5 h-3.5" /> Key Concepts
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {repo.key_concepts.map((concept, i) => (
+              <span key={i} className="text-[10px] px-2 py-1 rounded-md bg-surface-hover text-muted-foreground border border-border">
+                {concept}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-muted pt-2 border-t border-border/50">
         {repo.language && (
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-primary" />
@@ -114,6 +153,11 @@ export default function RepoCard({ repo, findings, onOpenDetail }: RepoCardProps
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" /> {timeAgo(repo.updated_at)}
         </span>
+        {repo.skill_level && (
+          <span className={`ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] capitalize ${skillLevelColor[repo.skill_level] || "bg-surface-hover text-muted"}`}>
+            {repo.skill_level}
+          </span>
+        )}
       </div>
 
       {expanded && findings && findings.length > 0 && (
@@ -128,3 +172,4 @@ export default function RepoCard({ repo, findings, onOpenDetail }: RepoCardProps
     </div>
   );
 }
+
